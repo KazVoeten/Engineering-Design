@@ -1,0 +1,60 @@
+/* Code for bringing the container forward and backward with keys on the keyboard (Serial has yet to be configured)
+  */
+
+#include <Servo.h>
+
+Servo containerServo; //creates Servo object (in this case the one that controls the container)
+
+char incomingCharacter = 0; //setting up the incoming character variable
+
+int pos = 0; //position variable for the servo
+
+int maxPosition = 180; //variable for the maximum amount of degrees the servo has to go to move the container completely forward (maybe it isn't 180)
+
+void setup() {
+  // put your setup code here, to run once:
+  containerServo.attach(9); //attaches this servo to pin 9 (in any Servo case we need a pin that has PWM)
+  Serial.begin(9600); //opens serial port, sets data rate
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //Check if something is being received
+  if (Serial.available() > 0) {
+    //read the incoming character and assign it to the incomingCharacter variable
+    incomingCharacter = Serial.read();
+    
+    Serial.println("OK!"); // Send OK back to laptop
+
+    //check the incoming character and perform the action assigned to that character
+    switch(incomingCharacter){
+
+      case 'f': //Case block
+      containerForward(); //container goes forward when you type 'f'
+      break;
+
+      case 'b': //Case block
+      containerBackward(); //container goes backward when you type 'b'
+      break;
+    }
+  }
+
+}
+
+//the action for bringing the container forward
+void containerForward() {
+    if (pos < maxPosition) { //checks if the servo-position insn't already the maximum position
+      pos+=5; //make the position of the servo 5 degrees more (work in steps so you can change the position more precisely
+      containerServo.write(pos); //tells servo to go to position
+      delay(15);  //wait 15 ms for the servo to react
+    }
+}
+
+//the action for bringing the container backward
+void containerBackward() {
+    if (pos > 0) { //checks if the servo-position isn't already zero
+      pos-=5; //make the position of the servo 5 degrees less (work in steps so you can change the position more precisely
+      containerServo.write(pos);  //tells servo to go to position
+      delay(15);  //wait 15 ms for the servo to react
+  }
+}
