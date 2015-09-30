@@ -1,0 +1,125 @@
+/* sketch for controlling DC-motor on M1-pin and M2-pin, using digital function for setting the motor power to full power or no power
+   and trying to control it by using cases on the keyboard 
+   Serial has yet to be configured
+ */
+
+//setting Pin-variables for the M1 Motor Shield (right wheel)
+int rightMotorForwardPin = 1; //setting variable for pin10, that should be connected to IN1 on the Motor Shield M1
+int rightMotorBackwardPin = 2; //setting variable for pin11, that should be connected to IN2 on the Motor Shield M1
+
+//setting Pin-variables for the M2 Motor Shield (left wheel)
+int leftMotorForwardPin = 4;//setting variable for pin6, that should be connected to IN1 on the Motor Shield M2
+int leftMotorBackwardPin = 7; //setting variable for pin9, that should be connected to IN2 on the Motor Shield M2
+
+char incomingCharacter = 0;//setting variable for the incoming character that was send by the laptop (a key)
+
+int delayTime = 1000; // setting a variable for the delaytime (in ms) after an action, this means you go forward for 1 second of you put the delaytime to 1000
+
+void setup() {
+  // put your setup code here, to run once:
+  //initialize the pins as output
+  pinMode(rightMotorForwardPin, OUTPUT);
+  pinMode(rightMotorBackwardPin, OUTPUT);
+  pinMode(leftMotorBackwardPin, OUTPUT);
+  pinMode(leftMotorBackwardPin, OUTPUT);
+  
+  Serial.begin(9600); //start serial communication at 9600 bps
+}
+
+void goForward() {
+  //Let the right and left motor run at full power forward
+  digitalWrite(rightMotorForwardPin, HIGH);
+  digitalWrite(rightMotorBackwardPin, LOW);
+  digitalWrite(leftMotorForwardPin, HIGH); 
+  digitalWrite(leftMotorBackwardPin, LOW);
+
+  //wait 1 second for going forwards
+  delay(delayTime);
+
+  //after that second, the motors will be shut down
+  digitalWrite(rightMotorForwardPin, LOW);
+  digitalWrite(leftMotorForwardPin, LOW); 
+}
+
+void goBackward() {
+  //Let the right and left motor run backwards at full power
+  digitalWrite(rightMotorForwardPin, LOW);
+  digitalWrite(rightMotorBackwardPin, HIGH);
+  digitalWrite(leftMotorForwardPin, LOW);
+  digitalWrite(leftMotorBackwardPin, HIGH);
+
+  //wait 1 second for going backwards
+  delay(delayTime);
+
+  //after that second, the motors will be shut down
+  digitalWrite(rightMotorBackwardPin, LOW);
+  digitalWrite(leftMotorBackwardPin, LOW);
+}
+
+void goRight() {
+  //Let the right motor stay shut down and the left motor run forward at full power
+  digitalWrite(rightMotorForwardPin, LOW);
+  digitalWrite(rightMotorBackwardPin, LOW);
+  digitalWrite(leftMotorForwardPin, HIGH);
+  digitalWrite(leftMotorBackwardPin, LOW);
+
+  //wait 1 second for going right a bit
+  delay(delayTime);
+
+  //after that second, the motors will be shut down
+  digitalWrite(leftMotorForwardPin, LOW); 
+}
+
+void goLeft() {
+  //Let the right run forward at full power and let the left motor stay shut down
+  digitalWrite(rightMotorForwardPin, HIGH);
+  digitalWrite(rightMotorBackwardPin, LOW);
+  digitalWrite(leftMotorForwardPin, LOW);
+  digitalWrite(leftMotorBackwardPin, LOW);
+
+  //wait 1 second for going left a bit
+  delay(delayTime);
+
+  //after that second, the motors will be shut down
+  digitalWrite(rightMotorForwardPin, LOW);
+}
+
+void performCommand() {
+  //check if there is a incoming signal available
+  if (Serial.available() > 0) {
+
+    //read the incoming signal and assign it to the variable incomingCharacter
+    incomingCharacter = Serial.read();
+    Serial.println("OK!"); //print OK! to the screen for letting know that the signal came through
+
+    //check the incomingCharacter and perform the actions that were assigned to those characters
+    switch(incomingCharacter) {
+
+      //if the incoming character is a 'w', perform the action described in the method goForward
+      case 'w':
+      goForward();
+      break;
+
+      //if the incoming character is a 's', perform the action described in the method goBackward
+      case 's':
+      goBackward();
+      break;
+
+      //if the incoming character is a 'a', perform the action described in the method goLeft
+      case 'a':
+      goLeft();
+      break;
+
+      //if the incoming character is a 'd', perform the action described in the method goRight
+      case 'd':
+      goRight();
+      break;
+    }
+  }
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //check continuously what the incoming character is and what action should be performed
+  performCommand();
+}
